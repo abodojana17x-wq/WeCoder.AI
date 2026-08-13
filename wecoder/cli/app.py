@@ -19,6 +19,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from wecoder import __version__
+from wecoder.cli.models_cmd import list_models, ping_model
 from wecoder.config.settings import DEFAULT_CONFIG_TEXT, Settings
 from wecoder.errors import ConfigError, WecoderError
 from wecoder.observability.logging import configure_logging
@@ -61,8 +62,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="overwrite an existing config file",
     )
 
-    subparsers.add_parser(
-        "status", help="print version, config source, and environment status"
+    subparsers.add_parser("status", help="print version, config source, and environment status")
+    models_parser = subparsers.add_parser(
+        "models", help="inspect or explicitly check model providers"
+    )
+    models_subparsers = models_parser.add_subparsers(dest="models_command", required=True)
+    models_subparsers.add_parser("list", help="list registered providers (no network calls)")
+    models_subparsers.add_parser(
+        "ping", help="explicitly check the configured provider; may contact it"
     )
 
     return parser
@@ -97,6 +104,13 @@ def main(
 
         if args.command == "status":
             _cmd_status(settings)
+            return EXIT_OK
+
+        if args.command == "models":
+            if args.models_command == "list":
+                list_models(settings)
+            elif args.models_command == "ping":
+                ping_model(settings)
             return EXIT_OK
 
         # Unreachable for known commands; argparse rejects unknown ones.
