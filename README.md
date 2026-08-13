@@ -37,20 +37,20 @@ WeCoder.AI utilizes a continuous feedback loop between two distinct AI personas:
 > implemented. The repository currently contains the Phase 01 engineering
 > foundation described below.
 >
-> **Implemented:** installable Python 3.11+ package, a `wecoder` CLI skeleton
-> (`--help`, `--version`, `init`, `status`), typed configuration (TOML +
-> `WECODER_*` env + defaults), structured logging, an error hierarchy, and a
-> pytest / ruff / mypy / CI baseline.
+> **Implemented:** installable Python 3.11+ package, the `wecoder` CLI
+> (`--help`, `--version`, `init`, `status`, `models list`, `models ping`), typed
+> configuration (TOML + `WECODER_*` env + defaults), structured logging, an
+> error hierarchy, and a vendor-neutral model boundary with Ollama and
+> OpenAI-compatible HTTP adapters.
 >
-> **Planned (future phases):** model providers, tools, the coding agent,
-> multi-agent collaboration, memory, and everything else in the vision above.
+> **Planned (future phases):** tools, the coding agent, multi-agent
+> collaboration, memory, and everything else in the vision above.
 
 ---
 
 ## 🛠 Development
 
-Requires Python 3.11+. This is the Phase 01 engineering baseline; model
-providers, tools, and the agent are not yet implemented.
+Requires Python 3.11+. Phase 02 adds the model boundary: configure `ollama` or `openai_compat`, inspect adapters with `wecoder models list`, and explicitly check connectivity with `wecoder models ping`. The latter may contact a provider (and cloud usage may cost money). Tools and the agent are not implemented.
 
 ```bash
 python -m venv .venv
