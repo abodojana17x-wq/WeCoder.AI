@@ -5,11 +5,8 @@
 </p>
 
 <p align="center">
-  <a href="#"><img src="https://img.shields.io/badge/Status-Beta-blue?style=flat-square" alt="Status"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python" alt="Python"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python" alt="Python"></a>
   <a href="#"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Architecture-Dual--Agent-orange?style=flat-square" alt="Architecture"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Mode-Offline--First-red?style=flat-square" alt="Offline"></a>
 </p>
 
 ---
@@ -35,3 +32,43 @@ Built for **low-resource environments**, it ensures that powerful, multi-agent A
 ## ⚙️ How It Works
 
 WeCoder.AI utilizes a continuous feedback loop between two distinct AI personas:
+
+> **Status:** The capabilities described above are **planned**, not yet
+> implemented. The repository currently contains the Phase 01 engineering
+> foundation described below.
+>
+> **Implemented:** installable Python 3.11+ package, a `wecoder` CLI skeleton
+> (`--help`, `--version`, `init`, `status`), typed configuration (TOML +
+> `WECODER_*` env + defaults), structured logging, an error hierarchy, and a
+> pytest / ruff / mypy / CI baseline.
+>
+> **Planned (future phases):** model providers, tools, the coding agent,
+> multi-agent collaboration, memory, and everything else in the vision above.
+
+---
+
+## 🛠 Development
+
+Requires Python 3.11+. This is the Phase 01 engineering baseline; model
+providers, tools, and the agent are not yet implemented.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+
+wecoder --help
+wecoder status        # print version, config source, python version
+wecoder init          # write a default project config to .wecoder/config.toml
+```
+
+Run checks:
+
+```bash
+pytest          # test suite
+ruff check .    # lint
+mypy wecoder    # type check
+```
+
+Configuration precedence (highest last wins): built-in defaults → `~/.wecoder/config.toml`
+→ `<cwd>/.wecoder/config.toml` → `WECODER_*` environment variables → CLI flags.

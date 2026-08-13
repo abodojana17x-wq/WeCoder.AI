@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# WeCoder.AI product paths (local state; never commit)
+.wecoder/logs/
+.wecoder/sessions/
