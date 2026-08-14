@@ -1,4 +1,4 @@
-"""The WeCoder.AI command-line application (Phase 01).
+"""The WeCoder.AI command-line application (Phase 01+).
 
 Exit codes:
     0  success
@@ -19,6 +19,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from wecoder import __version__
+from wecoder.cli.inspect_cmd import inspect as inspect_workspace
 from wecoder.cli.models_cmd import list_models, ping_model
 from wecoder.config.settings import DEFAULT_CONFIG_TEXT, Settings
 from wecoder.errors import ConfigError, WecoderError
@@ -72,6 +73,13 @@ def build_parser() -> argparse.ArgumentParser:
         "ping", help="explicitly check the configured provider; may contact it"
     )
 
+    # Phase 03: workspace / tool / context inspection. No model call.
+    subparsers.add_parser(
+        "inspect",
+        help="print the resolved workspace root, tree excerpt, language "
+        "hints, and available tool names (no model call)",
+    )
+
     return parser
 
 
@@ -111,6 +119,10 @@ def main(
                 list_models(settings)
             elif args.models_command == "ping":
                 ping_model(settings)
+            return EXIT_OK
+
+        if args.command == "inspect":
+            inspect_workspace(settings, cwd=cwd)
             return EXIT_OK
 
         # Unreachable for known commands; argparse rejects unknown ones.
