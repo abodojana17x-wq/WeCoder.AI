@@ -2,7 +2,7 @@
 
 Exit codes:
     0  success
-    1  usage / configuration error
+    1  usage / configuration error / expected operational failure
     2  unexpected (internal) error
 
 Later phases may add codes, but 0/1/2 retain these meanings.
@@ -15,12 +15,13 @@ import logging
 import os
 import platform
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from wecoder import __version__
 from wecoder.cli.inspect_cmd import inspect as inspect_workspace
 from wecoder.cli.models_cmd import list_models, ping_model
+from wecoder.cli.run_cmd import run as run_task
 from wecoder.config.settings import DEFAULT_CONFIG_TEXT, Settings
 from wecoder.errors import ConfigError, WecoderError
 from wecoder.observability.logging import configure_logging
@@ -80,6 +81,37 @@ def build_parser() -> argparse.ArgumentParser:
         "hints, and available tool names (no model call)",
     )
 
+    # Phase 04: the MVP coding agent. Makes model calls; may incur cost.
+    run_parser = subparsers.add_parser(
+        "run",
+        help="run the Developer coding agent on a task (makes model calls)",
+        description=(
+            "Run the single Developer agent on a natural-language coding "
+            "task. The agent inspects the workspace, edits files through "
+            "tools, and prints a structured result.\n\n"
+            "MVP limitation: there is no product-level Git yet — work on a "
+            "branch or stash first so you can review and revert the change."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    run_parser.add_argument("task", help="the natural-language coding task")
+    run_parser.add_argument(
+        "--workspace",
+        help="workspace root (default: current directory)",
+    )
+    run_parser.add_argument("--provider", help="model provider id override")
+    run_parser.add_argument("--model", help="model id override")
+    run_parser.add_argument(
+        "--max-turns",
+        type=int,
+        help="maximum agent turns (default: from config)",
+    )
+    run_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="emit structured JSON instead of human-readable output",
+    )
+
     return parser
 
 
@@ -88,11 +120,13 @@ def main(
     *,
     cwd: str | Path | None = None,
     home: str | Path | None = None,
+    env: Mapping[str, str] | None = None,
 ) -> int:
     """Run the CLI and return an exit code.
 
     ``cwd``/``home`` are forwarded to :meth:`Settings.load` so tests can run
-    against isolated directories.
+    against isolated directories.  ``env`` overrides ``os.environ`` for the
+    ``run`` test hook.
     """
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -124,6 +158,19 @@ def main(
         if args.command == "inspect":
             inspect_workspace(settings, cwd=cwd)
             return EXIT_OK
+
+        if args.command == "run":
+            return run_task(
+                settings,
+                args.task,
+                workspace=args.workspace,
+                provider=args.provider,
+                model=args.model,
+                max_turns=args.max_turns,
+                json_output=args.json,
+                cwd=cwd,
+                env=env,
+            )
 
         # Unreachable for known commands; argparse rejects unknown ones.
         parser.print_help(sys.stdout)

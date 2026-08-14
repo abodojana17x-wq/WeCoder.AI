@@ -16,7 +16,8 @@ class FakeModel:
     id = "fake"
 
     def __init__(self, responses: list[CompletionResponse]) -> None:
-        self.responses, self.requests = responses, []
+        self.responses = responses
+        self.requests: list[CompletionRequest] = []
 
     def capabilities(self) -> ModelCapabilities:
         return ModelCapabilities(False, False, False)
