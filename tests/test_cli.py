@@ -116,3 +116,26 @@ def test_python_dash_m_version() -> None:
     )
     assert result.returncode == 0
     assert __version__ in result.stdout
+
+
+def test_inspect_works_on_temp_project(project_dir: Path, home_dir: Path, capsys) -> None:
+    project_dir.mkdir(exist_ok=True)
+    (project_dir / "main.py").write_text("print('hi')\n")
+    (project_dir / "pyproject.toml").write_text("[project]\nname='x'\n")
+    assert main(["inspect"], cwd=str(project_dir), home=str(home_dir)) == 0
+    out = capsys.readouterr().out
+    assert "workspace root:" in out
+    assert "tools:" in out
+    assert "read_file" in out
+    assert "list_dir" in out
+    assert "run_command" in out
+
+
+def test_inspect_shows_language_hints(project_dir: Path, home_dir: Path, capsys) -> None:
+    project_dir.mkdir(exist_ok=True)
+    (project_dir / "app.py").write_text("x=1\n")
+    (project_dir / "lib.ts").write_text("const x=1\n")
+    assert main(["inspect"], cwd=str(project_dir), home=str(home_dir)) == 0
+    out = capsys.readouterr().out
+    assert "Python" in out
+    assert "TypeScript" in out
